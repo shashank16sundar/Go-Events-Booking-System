@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,9 @@ func main() {
 	//GET REQUESTS
 	server.GET("/", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, gin.H{"message": "Wassup!"}) })
 	server.GET("/events", getEvents)
+	server.GET("/events/:id", getEvent)
 
+	//POST REQUESTS
 	server.POST("/events", createEvent)
 
 	server.Run(":8080")
@@ -29,6 +32,21 @@ func getEvents(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusOK, events)
+}
+
+func getEvent(ctx *gin.Context) {
+	reqId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Not a valid input"})
+		return
+	}
+	event, err := models.GetEventByID(reqId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Not a valid event"})
+		return
+	}
+	ctx.JSON(http.StatusAccepted, gin.H{"message": "Event queried successfully", "event": event})
 }
 
 func createEvent(context *gin.Context) {
@@ -44,7 +62,7 @@ func createEvent(context *gin.Context) {
 	event.DateTime = time.Now()
 	err = event.Save()
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not save data"})
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not save data", "error": err})
 		return
 	}
 
