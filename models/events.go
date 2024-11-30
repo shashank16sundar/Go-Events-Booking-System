@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"shnk.com/eventx/db"
@@ -12,7 +13,7 @@ type Event struct {
 	Description string `binding:"required"`
 	Location    string `binding:"required"`
 	DateTime    time.Time
-	UserID      int
+	UserID      int64
 }
 
 func (e *Event) Save() error {
@@ -120,4 +121,39 @@ func GetAllEvents() ([]Event, error) {
 	}
 
 	return events, nil
+}
+
+func (e *Event) Register(userID int64) error {
+	query := `INSERT INTO registrations(event_id,user_id) VALUES(?,?)`
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.ID, userID)
+	return err
+}
+
+func (e *Event) CancelRegistration(userId int64) error {
+	query := `DELETE FROM registrations WHERE event_id=? AND user_id=?`
+	stmt, err := db.DB.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(e.ID, userId)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if rows == 0 {
+		return errors.New("no user found registered for this event")
+	}
+
+	return err
 }

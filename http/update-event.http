@@ -1,0 +1,9 @@
+PUT http://localhost:8080/events/1
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbElkIjoic2hhc2hhbmsyQGdtYWlsLmNvbSIsImV4cCI6MTczMjgzNTgzNywidXNlcklkIjoyfQ.Qp93z52WH0teDKrZH60wE4IkxcC0VMdyIq6gqTnwb80
+
+{
+    "Name": "shash1x",
+    "Description" : "Wow",
+    "Location" : "Mumbai"
+}

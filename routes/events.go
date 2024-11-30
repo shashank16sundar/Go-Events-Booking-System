@@ -36,15 +36,15 @@ func getEvent(ctx *gin.Context) {
 
 func createEvent(context *gin.Context) {
 	var event models.Event
-
 	err := context.ShouldBindJSON(&event)
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "Body not properly parsed"})
+		context.JSON(http.StatusBadRequest, gin.H{"message": "Body not properly parsed", "error": err})
 		return
 	}
-
 	event.DateTime = time.Now()
+	userId := context.GetInt64("userId")
+	event.UserID = userId
 	err = event.Save()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "Could not save data", "error": err})
@@ -61,9 +61,17 @@ func deleteEvent(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Not a valid input"})
 		return
 	}
+
+	userId := ctx.GetInt64("userId")
 	event, err := models.GetEventByID(reqId)
+
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Not a valid event"})
+		return
+	}
+
+	if userId != event.UserID {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized access to delete an event"})
 		return
 	}
 
@@ -83,9 +91,17 @@ func updateEvent(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Not a valid input"})
 		return
 	}
-	_, err = models.GetEventByID(reqId)
+
+	userId := ctx.GetInt64("userId")
+	event, err := models.GetEventByID(reqId)
+
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Not a valid event"})
+		return
+	}
+
+	if event.UserID != userId {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized access to update the event"})
 		return
 	}
 

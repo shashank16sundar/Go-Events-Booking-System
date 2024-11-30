@@ -1,0 +1,9 @@
+POST http://localhost:8080/events
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbElkIjoic2hhc2hhbmtAZ21haWwuY29tIiwiZXhwIjoxNzMyOTYxNjk5LCJ1c2VySWQiOjF9.F9oMpI7Q1xjVTnPv2Y_wZaShq5M3Z7ozZkG6GzrpHJs
+
+{
+    "Name" : "shash22",
+    "Description" : "seema",
+    "Location" : "Bore"
+}
